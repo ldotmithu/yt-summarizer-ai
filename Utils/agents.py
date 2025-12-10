@@ -28,7 +28,7 @@ import re
 
 def extract_id(state:YTState):
     video_url = state.video_url
-    # Regex to handle various YouTube URL formats including live streams and shorts
+    #  live streams and shorts
     regex = r"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})"
     match = re.search(regex, video_url)
     
@@ -71,7 +71,7 @@ def get_vectorstore(state:YTState):
 def user_question_answer(state:YTState):
     try:
         print(f"DEBUG: Entering user_question_answer with state type: {type(state)}")
-        # Handle dict input if LangGraph passes dict instead of Pydantic model
+        
         if isinstance(state, dict):
             print("DEBUG: State is a dict, converting to object for easier access if needed, or accessing keys directly.")
             question = state.get("question")
@@ -88,7 +88,7 @@ def user_question_answer(state:YTState):
 
         retriever = vectorstore.as_retriever()
         
-        # Retrieve relevant documents
+        
         docs = retriever.invoke(question)
         context = "\n".join([doc.page_content for doc in docs])
         print(f"DEBUG: Context length: {len(context)}")
@@ -107,7 +107,7 @@ def user_question_answer(state:YTState):
         return {"answer": f"Error processing question: {str(e)}"}
 
 
-# SUMMARY FLOW
+
 builder = StateGraph(YTState)
 
 builder.add_node("extract_video_id", extract_id)
@@ -124,7 +124,7 @@ builder.add_edge("create_vectorstore", END)
 summary_graph = builder.compile()
 
 
-# QA FLOW
+
 qa_builder = StateGraph(YTState)
 
 qa_builder.add_node("answer_question", user_question_answer)
