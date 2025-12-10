@@ -9,7 +9,7 @@ from langchain_core.prompts import PromptTemplate
 import os 
 from youtube_transcript_api import YouTubeTranscriptApi
 from langchain_community.vectorstores import FAISS
-llm = ChatGroq(model_name="openai/gpt-oss-120b",api_key=os.getenv("GROQ_API_KEY"),temperature=0.6)
+llm = ChatGroq(model_name="llama-3.3-70b-versatile",api_key=os.getenv("GROQ_API_KEY"),temperature=0.6)
 
 class YTState(BaseModel):
     video_url: str = Field(..., description="URL of the YouTube video")
