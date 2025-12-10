@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from Utils.agents import extract_id, get_transcript, get_summary, get_vectorstore, user_question_answer, YTState
+from Utils.agents import summary_graph, qa_graph, YTState
 import uuid
 
 app = FastAPI()
@@ -18,26 +18,16 @@ class ChatRequest(BaseModel):
 @app.post("/summarize")
 async def summarize_video(request: SummarizeRequest):
     try:
-        # Initialize state
-        state = YTState(video_url=request.video_url)
+        # Run Summary Graph
+        initial_state = {"video_url": request.video_url}
+        result = summary_graph.invoke(initial_state)
         
-        # Extract ID
-        id_result = extract_id(state)
-        state.video_id = id_result["video_id"]
-        
-        # Get Transcript
-        transcript_result = get_transcript(state)
-        if "Error" in transcript_result["transcript"]:
-             raise HTTPException(status_code=400, detail=transcript_result["transcript"])
-        state.transcript = transcript_result["transcript"]
-        
-        # Get Summary
-        summary_result = get_summary(state)
-        state.summary = summary_result["summary"]
-        
-        # Get Vectorstore
-        vectorstore_result = get_vectorstore(state)
-        state.vectorstore = vectorstore_result["vectorstore"]
+        # Check for errors in result if any (simplistic check)
+        if result.get("transcript") and "Error" in result["transcript"]:
+            raise HTTPException(status_code=400, detail=result["transcript"])
+             
+        # Create State Object for Session
+        state = YTState(**result)
         
         # Create Session
         session_id = str(uuid.uuid4())
@@ -60,9 +50,14 @@ async def chat_video(request: ChatRequest):
         state = sessions[request.session_id]
         state.question = request.question
         
-        answer_result = user_question_answer(state)
+        # Run QA Graph
+        # We pass the current state as input. 
+        # Since state is a Pydantic object, we might need to dump it to dict or pass as is if supported.
+        # LangGraph usually works with dicts for StateGraph configured with Pydantic model, 
+        # but passing the dict is safer.
+        result = qa_graph.invoke(state.dict())
         
-        return {"answer": answer_result["answer"]}
+        return {"answer": result["answer"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
