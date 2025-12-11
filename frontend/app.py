@@ -2,10 +2,10 @@ import streamlit as st
 import requests
 import time
 
-# Backend URL
+
 API_URL = "http://localhost:8000"
 
-# Page Config
+
 st.set_page_config(
     page_title="YouTube Summarizer AI",
     page_icon="🧠",
@@ -177,7 +177,7 @@ if "summary" not in st.session_state:
 if "video_id" not in st.session_state:
     st.session_state.video_id = None
 
-# Header
+
 st.markdown("""
     <div class="header-container">
         <div class="header-title">YouTube Summarizer AI</div>
@@ -185,7 +185,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Input Section
+# Input 
 if not st.session_state.summary:
     st.markdown('<div class="input-container">', unsafe_allow_html=True)
     video_url = st.text_input("Paste YouTube Video URL", placeholder="https://www.youtube.com/watch?v=...")
@@ -212,9 +212,8 @@ if not st.session_state.summary:
                 st.warning("Please enter a valid YouTube URL")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Content Section
+
 if st.session_state.summary:
-    # Main Layout
     col_left, col_right = st.columns([1.2, 0.8], gap="large")
     
     with col_left:
@@ -229,7 +228,6 @@ if st.session_state.summary:
         </div>
         """, unsafe_allow_html=True)
         
-        # Video Embed below summary
         if st.session_state.video_id:
             st.markdown("<br>", unsafe_allow_html=True)
             st.video(f"https://www.youtube.com/watch?v={st.session_state.video_id}")
@@ -242,7 +240,6 @@ if st.session_state.summary:
             </div>
         """, unsafe_allow_html=True)
         
-        # Chat History
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for role, text in st.session_state.chat_history:
             css_class = "user-message" if role == "User" else "bot-message"
@@ -257,7 +254,6 @@ if st.session_state.summary:
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Chat Input
         with st.form(key="chat_form", clear_on_submit=True):
             user_input = st.text_input("Ask a question about the video...", placeholder="Type your question here...")
             submit_button = st.form_submit_button("Send Message")
